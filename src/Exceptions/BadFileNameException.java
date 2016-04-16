@@ -5,7 +5,13 @@ package Exceptions;
  */
 public class BadFileNameException extends Exception {
 
-    public BadFileNameException(String message) {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public BadFileNameException(String message) {
         super(message);
     }
 

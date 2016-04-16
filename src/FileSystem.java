@@ -6,282 +6,321 @@ import java.util.Arrays;
 
 public class FileSystem {
 
-    private Tree fileSystemTree;
+	private Tree fileSystemTree;
+
+	/**
+	 * Stores file->block allocations
+	 */
+	public static Space fileStorage;
+
+	/**
+	 * Ctor - Initialise filesystem with empty root directory and \c m KB of
+	 * space
+	 *
+	 * @param m
+	 *            Amount, in KB, of disk space to allocate
+	 */
+	public FileSystem(int m) {
 
-    /**
-     * Stores file->block allocations
-     */
-    public static Space fileStorage;
+		fileSystemTree = new Tree("root");
 
-    /**
-     * Ctor - Initialise filesystem with empty root directory and \c m KB of space
-     *
-     * @param m Amount, in KB, of disk space to allocate
-     */
-    public FileSystem(int m) {
+		fileStorage = new Space(m);
 
-        fileSystemTree = new Tree("root");
+	}
 
-        fileStorage = new Space(m);
+	/**
+	 * Create an empty directory, with path provided in \c name.
+	 *
+	 * @param name
+	 *            String array containing path to directory to be created, as in
+	 *            \c file().
+	 */
+	public void dir(String[] name) throws BadFileNameException {
 
-    }
+		Tree workingTree = fileSystemTree;
 
-    /**
-     * Create an empty directory, with path provided in \c name.
-     *
-     * @param name String array containing path to directory to be created, as in \c file().
-     */
-    public void dir(String[] name) throws BadFileNameException {
+		if (!name[0].equals("root") || (FileExists(name) != null)) {
+//			System.out.println("not root");
+			throw new BadFileNameException("Invalid File Exception");
 
-        Tree workingTree = fileSystemTree;
+		}
 
-        if (name[0] != "root" || (FileExists(name) != null)) {
+		if (DirExists(name) != null) {
+//			System.out.println("DirExists(name) == null");
+			return;
+		}
 
-            throw new BadFileNameException("Invalid File Exception");
+		// loop all the way, creating as we go down if necessary
+		for (int i = 0; i < name.length; i++) {
+//			System.out.println("in loop");
+			workingTree = workingTree.GetChildByName(name[i]);
 
-        }
+		}
 
-        if (DirExists(name) != null) {
+	}
 
-            return;
+	/**
+	 * List allocation of blocks on disk.
+	 *
+	 * @return A 2D String array of block/file allocations. Each index
+	 *         corresponds to one disk block and the entry is either null if the
+	 *         blocks is free or an array of strings which is the path to the
+	 *         file occupying that block.
+	 */
+	public String[][] disk() {
 
-        }
+		Leaf[] alloc = FileSystem.fileStorage.getAlloc();
+		String[][] disk = new String[alloc.length][];
+		int i = 0;
 
-        //loop all the way, creating as we go down if necessary
-        for (int i = 0; i < name.length; i++) {
+		for (Leaf elem : alloc) {
 
-            workingTree = workingTree.GetChildByName(name[i]);
+			if (elem == null) {
 
-        }
+				i++;
+				continue;
 
-    }
+			} else {
 
-    /**
-     * List allocation of blocks on disk.
-     *
-     * @return A 2D String array of block/file allocations. Each index corresponds to one disk block and the entry is either null
-     * if the blocks is free or an array of strings which is the path to the file occupying that block.
-     */
-    public String[][] disk() {
+				disk[i++] = elem.getPath();
 
-        Leaf[] alloc = FileSystem.fileStorage.getAlloc();
-        String[][] disk = new String[alloc.length][];
-        int i = 0;
+			}
 
-        for (Leaf elem : alloc) {
+		}
 
-            if (elem == null) {
+		return disk;
 
-                i++;
-                continue;
+	}
 
-            } else {
+	/**
+	 * Create a \c k KB file, path provided in name.
+	 *
+	 * @param name
+	 *            String array, each element of which is an element in the path
+	 *            to file. Must start with root. Any nonexistent directories
+	 *            along the path will be created.
+	 * @param k
+	 *            Size of file to create, in KB.
+	 * @throws BadFileNameException
+	 *             First directory is not root.
+	 * @throws OutOfSpaceException
+	 *             Adding child failed; not enough free space.
+	 */
+	public void file(String[] name, int k) throws BadFileNameException, OutOfSpaceException {
 
-                disk[i++] = elem.getPath();
+		Tree workingTree = fileSystemTree;
+		String fileName = name[name.length - 1];
+//		System.out.println("WTF: " + name[0]);
+		if (!name[0].equals("root")) {
 
-            }
+			throw new BadFileNameException();
 
-        }
+		}
 
-        return disk;
+		if (k > FileSystem.fileStorage.countFreeSpace()) { // not enough space
+															// free
 
-    }
+			Leaf file = FileExists(name);
 
-    /**
-     * Create a \c k KB file, path provided in name.
-     *
-     * @param name String array, each element of which is an element in the path to file.
-     *             Must start with root. Any nonexistent directories along the path will be created.
-     * @param k    Size of file to create, in KB.
-     * @throws BadFileNameException First directory is not root.
-     * @throws OutOfSpaceException  Adding child failed; not enough free space.
-     */
-    public void file(String[] name, int k) throws BadFileNameException, OutOfSpaceException {
+			if (file == null) {
 
-        Tree workingTree = fileSystemTree;
-        String fileName = name[name.length - 1];
+				throw new OutOfSpaceException();
 
-        if (name[0] != "root") {
+			} else if (k <= (FileSystem.fileStorage.countFreeSpace() - file.allocations.length)) { // if
+																									// there
+																									// will
+																									// be
+																									// enough
+																									// space
+																									// free
+																									// after
+																									// deleting
+																									// the
+																									// old
+																									// file,
+																									// do
+																									// it
 
-            throw new BadFileNameException();
+				rmfile(name);
 
-        }
+			}
 
-        if (k > FileSystem.fileStorage.countFreeSpace()) { //not enough space free
+		}
 
-            Leaf file = FileExists(name);
+		// loop until level containing file
+		for (int i = 0; i < name.length - 1; i++) {
 
-            if (file == null) {
+			workingTree = workingTree.GetChildByName(name[i]);
 
-                throw new OutOfSpaceException();
+		}
 
-            } else if (k <= (FileSystem.fileStorage.countFreeSpace() - file.allocations.length)) { //if there will be enough space free after deleting the old file, do it
+		// will now be at same level as file, contained in workingTree
+		if (workingTree.children.containsKey(fileName)) { // file exists, remove
+															// (reached this
+															// point, so file
+															// can fit)
 
-                rmfile(name);
+			if (workingTree.children.get(fileName).getClass().getName() == "Tree") { // name
+																						// of
+																						// existing
+																						// directory
 
-            }
+				throw new BadFileNameException();
 
-        }
+			}
 
-        //loop until level containing file
-        for (int i = 0; i < name.length - 1; i++) {
+			// enough space free, remove old file
+			rmfile(name);
 
-            workingTree = workingTree.GetChildByName(name[i]);
+		}
 
-        }
+		Leaf newLeaf = new Leaf(fileName, k);
+		newLeaf.parent = workingTree;
+		newLeaf.depth = newLeaf.parent.depth + 1;
 
-        //will now be at same level as file, contained in workingTree
-        if (workingTree.children.containsKey(fileName)) { //file exists, remove (reached this point, so file can fit)
+		workingTree.children.put(fileName, newLeaf);
 
-            if (workingTree.children.get(fileName).getClass().getName() == "Tree") { //name of existing directory
+	}
 
-                throw new BadFileNameException();
+	/**
+	 * List files and subdirectories contained in name.
+	 *
+	 * @param name
+	 *            String array containing path to directory to list, as in \c
+	 *            file().
+	 * @return A String array containing the filename (only) of all files in the
+	 *         directory.
+	 */
+	public String[] lsdir(String[] name) {
 
-            }
+		Tree file = DirExists(name);
+		String[] fileList;
 
-            //enough space free, remove old file
-            rmfile(name);
+		if (file == null) {
 
-        }
+			return null;
 
-        Leaf newLeaf = new Leaf(fileName, k);
-        newLeaf.parent = workingTree;
-        newLeaf.depth = newLeaf.parent.depth + 1;
+		}
 
-        workingTree.children.put(fileName, newLeaf);
+		fileList = new String[file.children.size()];
+		fileList = file.children.keySet().toArray(fileList);
 
-    }
+		// sort array - not essential, but nice!
+		Arrays.sort(fileList);
 
-    /**
-     * List files and subdirectories contained in name.
-     *
-     * @param name String array containing path to directory to list, as in \c file().
-     * @return A String array containing the filename (only) of all files in the directory.
-     */
-    public String[] lsdir(String[] name) {
+		return fileList;
 
-        Tree file = DirExists(name);
-        String[] fileList;
+	}
 
-        if (file == null) {
+	/**
+	 * Remove a file.
+	 *
+	 * @param name
+	 *            String array containing path to file to be removed, as in \c
+	 *            file().
+	 */
+	public void rmfile(String[] name) {
 
-            return null;
+		Leaf file = FileExists(name);
 
-        }
+		if (file == null) { // file doesn't exist
 
-        fileList = new String[file.children.size()];
-        fileList = file.children.keySet().toArray(fileList);
+			return;
 
-        //sort array - not essential, but nice!
-        Arrays.sort(fileList);
+		}
 
-        return fileList;
+		FileSystem.fileStorage.Dealloc(file);
 
-    }
+	}
 
-    /**
-     * Remove a file.
-     *
-     * @param name String array containing path to file to be removed, as in \c file().
-     */
-    public void rmfile(String[] name) {
+	/**
+	 * Remove an empty directory.
+	 *
+	 * @param name
+	 *            String array containing path to directory to be removed, as in
+	 *            \c file().
+	 * @throws DirectoryNotEmptyException
+	 *             The directory is not empty.
+	 */
+	public void rmdir(String[] name) throws DirectoryNotEmptyException {
 
-        Leaf file = FileExists(name);
+		Tree dir = DirExists(name);
 
-        if (file == null) { //file doesn't exist
+		if (dir == null) {
 
-            return;
+			return;
 
-        }
+		}
 
-        FileSystem.fileStorage.Dealloc(file);
+		if (dir.children.size() > 0) {
 
-    }
+			throw new DirectoryNotEmptyException();
 
-    /**
-     * Remove an empty directory.
-     *
-     * @param name String array containing path to directory to be removed, as in \c file().
-     * @throws DirectoryNotEmptyException The directory is not empty.
-     */
-    public void rmdir(String[] name) throws DirectoryNotEmptyException {
+		}
 
-        Tree dir = DirExists(name);
+		dir.parent.children.remove(dir.name);
 
-        if (dir == null) {
+	}
 
-            return;
+	private Node PathExists(String[] name) {
 
-        }
+		Tree workingTree = fileSystemTree;
 
-        if (dir.children.size() > 0) {
+		for (int i = 0; i < name.length - 1; i++) {
 
-            throw new DirectoryNotEmptyException();
+			if (!workingTree.children.containsKey(name[i])) {
 
-        }
+				return null;
 
-        dir.parent.children.remove(dir.name);
+			}
 
-    }
+			workingTree = (Tree) workingTree.children.get(name[i]);
 
+		}
 
-    private Node PathExists(String[] name) {
+		return workingTree.children.get(name[name.length - 1]);
 
-        Tree workingTree = fileSystemTree;
+	}
 
-        for (int i = 0; i < name.length - 1; i++) {
+	/**
+	 * Checks whether the specified file exists
+	 *
+	 * @param name
+	 *            Path to the file
+	 * @return File if exists, \c null otherwise
+	 */
+	public Leaf FileExists(String[] name) {
 
-            if (!workingTree.children.containsKey(name[i])) {
+		Node found = PathExists(name);
 
-                return null;
+		if (found == null || found.getClass().getName() == "Node") {
 
-            }
+			return null;
 
-            workingTree = (Tree) workingTree.children.get(name[i]);
+		}
 
-        }
+		return (Leaf) found;
 
-        return workingTree.children.get(name[name.length - 1]);
+	}
 
-    }
+	/**
+	 * Checks whether the specified directory exists
+	 *
+	 * @param name
+	 *            Path to directory
+	 * @return Directory if exists, null otherwise
+	 */
+	public Tree DirExists(String[] name) {
 
-    /**
-     * Checks whether the specified file exists
-     *
-     * @param name Path to the file
-     * @return File if exists, \c null otherwise
-     */
-    public Leaf FileExists(String[] name) {
+		Node found = PathExists(name);
 
-        Node found = PathExists(name);
+		if (found == null || found.getClass().getName() == "Leaf") {
 
-        if (found == null || found.getClass().getName() == "Node") {
+			return null;
 
-            return null;
+		}
 
-        }
+		return (Tree) found;
 
-        return (Leaf) found;
-
-    }
-
-    /**
-     * Checks whether the specified directory exists
-     *
-     * @param name Path to directory
-     * @return Directory if exists, null otherwise
-     */
-    public Tree DirExists(String[] name) {
-
-        Node found = PathExists(name);
-
-        if (found == null || found.getClass().getName() == "Leaf") {
-
-            return null;
-
-        }
-
-        return (Tree) found;
-
-    }
+	}
 }

@@ -28,7 +28,7 @@ class Tree extends Node {
     public Tree GetChildByName(String name) {
 
         if (this.children.containsKey(name)) {
-
+//        	System.out.println("dir exists");
             return (Tree) this.children.get(name);
 
         }
@@ -36,6 +36,7 @@ class Tree extends Node {
         //not found - create
 
         Tree newTree = new Tree(name);
+//        System.out.println(this.name);
         newTree.parent = this;
         newTree.depth = newTree.parent.depth + 1;
 
