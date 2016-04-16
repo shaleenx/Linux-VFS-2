@@ -1,3 +1,5 @@
+import java.util.Scanner;
+
 import Exceptions.BadFileNameException;
 import Exceptions.OutOfSpaceException;
 
@@ -9,6 +11,30 @@ public class FileSimulator {
 	public static void main(String[] args) {
 		int capacity = 10240;
 		FileSystem sda1 = new FileSystem(capacity);
+		String cmd = "";
+		Scanner sc = new Scanner(System.in);
+		while(!cmd.equalsIgnoreCase("exit")){
+			System.out.println(">");
+			cmd = sc.nextLine();
+			switch(cmd){
+			case "mkdir":
+				break;
+			case "cd":
+				break;
+			case "rmdir":
+				break;
+			case "touch":
+				break;
+			case "rm":
+				break;
+			case "mv":
+				break;
+			case "ls":
+				break;
+			case "cat":
+				break;
+			}
+		}
 		try {
 			sda1.dir(formatPath("root"));
 			sda1.dir(formatPath("root/hello"));
