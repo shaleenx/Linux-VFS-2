@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 
-import Exceptions.BadFileNameException;
+import Exceptions.DirectoryNotEmptyException;
 
 /**
  * Created by pradeet on 12/4/16.
@@ -11,7 +11,7 @@ public class FileSimulator {
 
 	public static void main(String[] args) {
 		try {
-			ArrayList<FileSystem> sdas = new ArrayList<>();
+			// ArrayList<FileSystem> sdas = new ArrayList<>();
 			ArrayList<String> prompt = new ArrayList<>();
 			prompt.add("root");
 			String cmd = "";
@@ -22,15 +22,6 @@ public class FileSimulator {
 				cmd = sc.next();
 				switch (cmd) {
 				case "sda":
-					// int count = sdas.size();
-					// FileSystem newFS = new
-					// FileSystem(Integer.parseInt(sc.next()));
-					// sdas.add(newFS);
-					// int presentSda = count + 1;
-					// prompt.clear();
-					// prompt.add("sda" + presentSda);
-					// sda = sdas.get(presentSda - 1);
-					// System.out.println("created new sda" + presentSda);
 					System.out.println("Check version 2 for this feature :P");
 					break;
 				case "mkdir":
@@ -45,9 +36,9 @@ public class FileSimulator {
 					break;
 				case "cd":
 					folderName = sc.next();
-					System.out.println("||" + folderName + "||");
 					if (folderName.contains("..")) {
 						prompt.remove(prompt.size() - 1);
+						break;
 					}
 					Tree tree = sda.DirExists(formatPath(formatPrompt(prompt) + "/" + folderName));
 					if (tree != null) {
@@ -57,18 +48,56 @@ public class FileSimulator {
 					}
 					break;
 				case "rmdir":
+					folderName = sc.next();
+					try {
+						sda.rmdir(formatPath(formatPrompt(prompt) + "/" + folderName));
+					} catch (DirectoryNotEmptyException e) {
+						e.printStackTrace();
+					}
 					break;
 				case "touch":
+					String fileName = sc.next();
+					int size = Integer.parseInt(sc.next());
+					sda.file(formatPath(formatPrompt(prompt) + "/" + fileName), size);
 					break;
 				case "rm":
+					String rm_flag = sc.next();
+					if (rm_flag.toLowerCase().equals("-r")) {
+
+					} else {
+						fileName = rm_flag;
+						sda.rmfile(formatPath(formatPrompt(prompt) + "/" + fileName));
+					}
 					break;
 				case "mv":
+					System.out.println("Check version 2 for this feature :P");
 					break;
 				case "ls":
 					String[] list = sda.lsdir(formatPath(formatPrompt(prompt)));
 					printStringArray(list);
 					break;
 				case "cat":
+					fileName = sc.next();
+					String data = sda.read(formatPath(formatPrompt(prompt) + "/" + fileName));
+					System.out.println(data);
+					break;
+				case "echo":
+					String argument = sc.nextLine();
+					String input = argument.substring(1, argument.length());
+					input = input.substring(1, input.lastIndexOf("\""));
+					System.out.println(input);
+					String[] arguments = argument.substring(argument.lastIndexOf("\"") + 1).trim().split(" ");
+					System.out.println(arguments[0]);
+					if (">".equals(arguments[0])) {
+						sda.write(formatPath(formatPrompt(prompt) + "/" + arguments[1]), input);
+					} else if (">>".equals(arguments[0])) {
+						sda.append(formatPath(formatPrompt(prompt) + "/" + arguments[1]), input);
+					}
+					break;
+				case "exit":
+					break;
+				case "help":
+				default:
 					break;
 				}
 			}
@@ -76,24 +105,6 @@ public class FileSimulator {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		// try {
-		// sda1.dir(formatPath("root"));
-		// sda1.dir(formatPath("root/hello"));
-		// sda1.file(formatPath("root/sample1.txt"), 20);
-		// sda1.file(formatPath("root/hello/sample.txt"), 30);
-		// sda1.DirExists(formatPath("root"));
-		// } catch (BadFileNameException e) {
-		// e.printStackTrace();
-		// } catch (OutOfSpaceException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		//
-		// printStringArray(sda1.lsdir(formatPath("root")));
-		//
-		// // String[][] disk = sda1.disk();
-		// // printdisk(disk);
-		// System.out.println(sda1.lsdir(formatPath("root")).length);
 	}
 
 	private static String formatPrompt(ArrayList<String> prompt) {

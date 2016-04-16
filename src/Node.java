@@ -29,9 +29,6 @@ abstract class Node {
             workingNode = workingNode.parent;
 
         }
-
         return path;
-
     }
-
 }

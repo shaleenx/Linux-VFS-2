@@ -2,7 +2,10 @@ import Exceptions.BadFileNameException;
 import Exceptions.DirectoryNotEmptyException;
 import Exceptions.OutOfSpaceException;
 
+import java.io.IOException;
 import java.util.Arrays;
+
+import javax.tools.DiagnosticListener;
 
 public class FileSystem {
 
@@ -13,18 +16,23 @@ public class FileSystem {
 	 */
 	public static Space fileStorage;
 
+	public static DiskManager diskManager;
+
 	/**
 	 * Ctor - Initialise filesystem with empty root directory and \c m KB of
 	 * space
 	 *
 	 * @param m
 	 *            Amount, in KB, of disk space to allocate
+	 * @throws IOException
 	 */
-	public FileSystem(int m) {
+	public FileSystem(int m) throws IOException {
 
 		fileSystemTree = new Tree("root");
 
 		fileStorage = new Space(m);
+
+		diskManager = new DiskManager(m * 1024);
 
 	}
 
@@ -40,21 +48,19 @@ public class FileSystem {
 		Tree workingTree = fileSystemTree;
 
 		if (!name[0].equals("root") || (FileExists(name) != null)) {
-//			System.out.println("not root");
+			// System.out.println("not root");
 			throw new BadFileNameException("Invalid File Exception");
 
 		}
 
 		if (DirExists(name) != null) {
-//			System.out.println("DirExists(name) == null");
 			return;
 		}
 
 		// loop all the way, creating as we go down if necessary
 		for (int i = 0; i < name.length; i++) {
-//			System.out.println("in loop");
+			// System.out.println("in loop");
 			workingTree = workingTree.GetChildByName(name[i]);
-
 		}
 
 	}
@@ -110,15 +116,15 @@ public class FileSystem {
 
 		Tree workingTree = fileSystemTree;
 		String fileName = name[name.length - 1];
-//		System.out.println("WTF: " + name[0]);
+		// System.out.println("WTF: " + name[0]);
 		if (!name[0].equals("root")) {
 
 			throw new BadFileNameException();
 
 		}
 
-		if (k > FileSystem.fileStorage.countFreeSpace()) { // not enough space
-															// free
+		if (k > FileSystem.fileStorage.countFreeSpace()) {
+			// not enough space free
 
 			Leaf file = FileExists(name);
 
@@ -126,20 +132,9 @@ public class FileSystem {
 
 				throw new OutOfSpaceException();
 
-			} else if (k <= (FileSystem.fileStorage.countFreeSpace() - file.allocations.length)) { // if
-																									// there
-																									// will
-																									// be
-																									// enough
-																									// space
-																									// free
-																									// after
-																									// deleting
-																									// the
-																									// old
-																									// file,
-																									// do
-																									// it
+			} else if (k <= (FileSystem.fileStorage.countFreeSpace() - file.allocations.length)) {
+				// if there will be enough space free after deleting the old
+				// file, do it
 
 				rmfile(name);
 
@@ -154,11 +149,10 @@ public class FileSystem {
 
 		}
 
-		// will now be at same level as file, contained in workingTree
-		if (workingTree.children.containsKey(fileName)) { // file exists, remove
-															// (reached this
-															// point, so file
-															// can fit)
+		// will now be at same level as file, contained in workingTree file
+		// exists, remove (reached this point, so file can fit)
+
+		if (workingTree.children.containsKey(fileName)) {
 
 			if (workingTree.children.get(fileName).getClass().getName() == "Tree") { // name
 																						// of
@@ -218,14 +212,15 @@ public class FileSystem {
 	 * @param name
 	 *            String array containing path to file to be removed, as in \c
 	 *            file().
+	 * @throws BadFileNameException
 	 */
-	public void rmfile(String[] name) {
+	public void rmfile(String[] name) throws BadFileNameException {
 
 		Leaf file = FileExists(name);
 
 		if (file == null) { // file doesn't exist
 
-			return;
+			throw new BadFileNameException("File Doesnot exists");
 
 		}
 
@@ -322,5 +317,58 @@ public class FileSystem {
 
 		return (Tree) found;
 
+	}
+
+	/**
+	 * Writes to the file specified in /c fromat.
+	 * 
+	 * @param name
+	 *            Name of the file to be written.
+	 * @param input
+	 *            The text to be written to the file.
+	 * @throws OutOfSpaceException
+	 * @throws BadFileNameException
+	 */
+	public void write(String[] name, String input) throws BadFileNameException, OutOfSpaceException {
+
+		int input_size = input.length();
+		int num_blocks = (input.length() % 1024 == 0) ? input_size / 1024 : input_size / 1024 + 1;
+
+		Leaf file = FileExists(name);
+
+		if (file == null) {
+			file(name, num_blocks);
+		}
+
+		file = FileExists(name);
+		diskManager.writeToDisk(file, input);
+	}
+
+	public void append(String[] name, String input) throws BadFileNameException, OutOfSpaceException {
+
+		int input_size = input.length();
+		int num_blocks = (input.length() % 1024 == 0) ? input_size / 1024 : input_size / 1024 + 1;
+
+		Leaf file = FileExists(name);
+
+		if (file == null) {
+			file(name, num_blocks);
+		} else {
+			int size = file.size;
+			int blocksRequired = num_blocks;
+			if (fileStorage.countFreeSpace() < blocksRequired) {
+				throw new OutOfSpaceException("DiskSpace Full!");
+			}
+			String filedata = diskManager.read(file);
+			this.rmfile(name);
+			file(name, num_blocks + size);
+			file = FileExists(name);
+			diskManager.writeToDisk(file, filedata + input);
+		}
+
+	}
+
+	public String read(String[] formatPath) {
+		return null;
 	}
 }
