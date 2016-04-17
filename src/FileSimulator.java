@@ -15,22 +15,23 @@ public class FileSimulator {
 			ArrayList<String> prompt = new ArrayList<>();
 			prompt.add("root");
 			String cmd = "";
-			FileSystem sda = new FileSystem(1024);
-			Printer.println("HELLO");
+			FileSystem sda = new FileSystem(10240);
 			Scanner sc = new Scanner(System.in);
 			while (!cmd.equalsIgnoreCase("exit")) {
-				Printer.print("pradeet@OS: /" + formatPrompt(prompt) + "$  ");
+				System.out.print("pradeet@OS: /" + formatPrompt(prompt) + "$  ");
 				cmd = sc.next();
 				switch (cmd) {
 				case "sda":
-					Printer.println("Check version 2 for this feature :P");
+					System.out.println("Check version 2 for this feature :P");
 					break;
 				case "mkdir":
 					String folderName = sc.next();
 					if (folderName.contains("/")) {
-						Printer.println(
+						System.out.println(
 								"mkdir: cannot create directory \'" + folderName + "\': No such file or Directory");
 					}
+					// System.out.println(formatPrompt(prompt) + "/" +
+					// folderName);
 					sda.dir(formatPath(formatPrompt(prompt) + "/" + folderName));
 					break;
 				case "cd":
@@ -43,7 +44,7 @@ public class FileSimulator {
 					if (tree != null) {
 						prompt.addAll(Arrays.asList(folderName.split("/")));
 					} else {
-						Printer.println("cd: " + folderName + ": No such file or directory");
+						System.out.println("cd: " + folderName + ": No such file or directory");
 					}
 					break;
 				case "rmdir":
@@ -57,7 +58,6 @@ public class FileSimulator {
 				case "touch":
 					String fileName = sc.next();
 					int size = Integer.parseInt(sc.next());
-					Printer.println("size: " + size);
 					sda.file(formatPath(formatPrompt(prompt) + "/" + fileName), size);
 					break;
 				case "rm":
@@ -70,7 +70,7 @@ public class FileSimulator {
 					}
 					break;
 				case "mv":
-					Printer.println("Check version 2 for this feature :P");
+					System.out.println("Check version 2 for this feature :P");
 					break;
 				case "ls":
 					String[] list = sda.lsdir(formatPath(formatPrompt(prompt)));
@@ -79,34 +79,29 @@ public class FileSimulator {
 				case "cat":
 					fileName = sc.next();
 					String data = sda.read(formatPath(formatPrompt(prompt) + "/" + fileName));
-					Printer.println(data);
+					System.out.println(data);
 					break;
 				case "echo":
 					String argument = sc.nextLine();
 					String input = argument.substring(1, argument.length());
 					input = input.substring(1, input.lastIndexOf("\""));
-					Printer.println("input: " + input);
+					System.out.println(input);
 					String[] arguments = argument.substring(argument.lastIndexOf("\"") + 1).trim().split(" ");
-					Printer.println(Arrays.toString(arguments));
+					System.out.println(arguments[0]);
 					if (">".equals(arguments[0])) {
-						Printer.println((formatPrompt(prompt) + "/" + arguments[1]));
-						Printer.println("input: " + input);
 						sda.write(formatPath(formatPrompt(prompt) + "/" + arguments[1]), input);
 					} else if (">>".equals(arguments[0])) {
-						Printer.println("INTO APPEND");
 						sda.append(formatPath(formatPrompt(prompt) + "/" + arguments[1]), input);
 					}
 					break;
-				case "pwd":
-					Printer.println(formatPrompt(prompt));
 				case "exit":
 					break;
 				case "help":
-          printhelp();
+          printHelp();
           break;
 				default:
           System.out.println("Command not found");
-          printhelp();
+          printHelp();
 					break;
 				}
 			}
@@ -132,39 +127,39 @@ public class FileSimulator {
 			return;
 		}
 		for (int i = 0; i < lsdir.length; i++) {
-			Printer.print(lsdir[i] + "  ");
+			System.out.print(lsdir[i] + "  ");
 		}
-		Printer.println();
+		System.out.println();
 	}
 
-	// private static void printdisk(String[][] disk) {
-	// Printer.println("Printing Disk:");
-	// int count = 0;
-	// for (int i = 0; i < disk.length; i++) {
-	// if (disk[i] != null) {
-	// count++;
-	// Printer.println(i + ":");
-	// for (int j = 0; j < disk[i].length; j++) {
-	// Printer.println(disk[i][j]);
-	// }
-	// }
-	// }
-	// Printer.println("NOT NULL Disks: " + count);
-	// }
+	private static void printdisk(String[][] disk) {
+		System.out.println("Printing Disk:");
+		int count = 0;
+		for (int i = 0; i < disk.length; i++) {
+			if (disk[i] != null) {
+				count++;
+				System.out.println(i + ":");
+				for (int j = 0; j < disk[i].length; j++) {
+					System.out.println(disk[i][j]);
+				}
+			}
+		}
+		System.out.println("NOT NULL Disks: " + count);
+	}
 
-	private static void printhelp() {
+	private static void printHelp() {
 		System.out.println("Usage:");
-		System.out.println("To create new folder:\t\t mkdir directoryname");
-		System.out.println("To change directory: \t\t cd directoryname \nTo go to parent directory: \t\t cd ..");
-		System.out.println("To remove directory(only empty directories) : \t\t rmdir directoryname");
-		System.out.println("To create a empty new file: \t\t touch filename filesize");
-		System.out.println("To remove a file: \t\t rm filename");
-		System.out.println("To move a file to different folder: \t\t mv source destination");
-		System.out.println("To list all contents of the directory: \t\t ls");
-		System.out.println("To view contents of the file: \t\t cat filename");
-		System.out.println("To write contents to a file:\nInsert contents\t\t echo contents > filename \nAppend contents:\t\t echo content >> filename");
-		System.out.println("To view this message:\t\t help");
-		System.out.println("To exit:\t\t exit");
+		System.out.println("To create new folder:\tmkdir directoryname");
+		System.out.println("To change directory: \tcd directoryname \nTo go to parent directory: \t cd ..");
+		System.out.println("To remove directory(only empty directories): \trmdir directoryname");
+		System.out.println("To create a empty new file: \t touch filename filesize");
+		System.out.println("To remove a file:\trm filename");
+		System.out.println("To move a file to different folder:\tmv source destination");
+		System.out.println("To list all contents of the directory:\tls");
+		System.out.println("To view contents of the file:\tcat filename");
+		System.out.println("To write contents to a file:\nInsert contents\techo \"contents\" > filename \nAppend contents:\t echo \"contents\" >> filename");
+		System.out.println("To view this message:\t help");
+		System.out.println("To exit:\t exit");
 
 	}
 	
