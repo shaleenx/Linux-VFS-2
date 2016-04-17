@@ -340,9 +340,10 @@ public class FileSystem {
 		}
 
 		file = FileExists(name);
-		System.out.println(file.toString());
+		file.data_size = input_size;
+		System.out.println("IN WRITE: " + file.toString());
 
-		int file_size = file.size * 1024;
+		int file_size = file.data_size * 1024;
 		if (input_size < file_size)
 			diskManager.writeToDisk(file, input);
 		else {
@@ -361,7 +362,7 @@ public class FileSystem {
 		if (file == null) {
 			file(name, num_blocks);
 		} else {
-			int size = file.size;
+			int size = file.data_size;
 			int blocksRequired = num_blocks;
 			if (fileStorage.countFreeSpace() < blocksRequired) {
 				throw new OutOfSpaceException("DiskSpace Full!");
@@ -375,8 +376,9 @@ public class FileSystem {
 
 	}
 
-	public String read(String[] formatPath) {
-
-		return null;
+	public String read(String[] name) throws IOException {
+		Leaf file = FileExists(name);
+		String data = diskManager.readFromDisk(file);
+		return data.trim();
 	}
 }

@@ -1,14 +1,16 @@
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class DiskManager {
 
 	RandomAccessFile sda;
-	
+
 	/**
 	 * 
-	 * @param size size of Disk in KBs
+	 * @param size
+	 *            size of Disk in KBs
 	 * @throws IOException
 	 */
 	public DiskManager(int size) throws IOException {
@@ -18,8 +20,9 @@ public class DiskManager {
 	}
 
 	public void writeToDisk(Leaf file, String input) throws IOException {
-		input += "\u001a";
+		System.out.println("DISKMANAGER: " + input);
 		ArrayList<String> input_blocks = splitEqually(input, 1024);
+		System.out.println(Arrays.toString(input_blocks.toArray()));
 		for (int i = 0; i < input_blocks.size(); i++) {
 			sda.seek(file.allocations[i] * 1024);
 			String write = input_blocks.get(i);
@@ -39,15 +42,20 @@ public class DiskManager {
 
 	public String readFromDisk(Leaf file) throws IOException {
 		String data = "";
-
+		int data_size = file.data_size;
+		int read_size = 0;
 		for (int i = 0; i < file.allocations.length; i++) {
 			sda.seek(file.allocations[i] * 1024);
 			byte read[] = new byte[1024];
 			sda.read(read);
-			
+
 			data += new String(read);
+			read_size += 1024;
+			if(read_size > data_size){
+				break;
+			}
 		}
 
-		return data;
+		return data.substring(0, data_size);
 	}
 }

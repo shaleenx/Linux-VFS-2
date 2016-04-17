@@ -97,6 +97,8 @@ public class FileSimulator {
 						sda.append(formatPath(formatPrompt(prompt) + "/" + arguments[1]), input);
 					}
 					break;
+				case "pwd":
+					System.out.println(formatPrompt(prompt));
 				case "exit":
 					break;
 				case "help":
@@ -131,20 +133,20 @@ public class FileSimulator {
 		System.out.println();
 	}
 
-	private static void printdisk(String[][] disk) {
-		System.out.println("Printing Disk:");
-		int count = 0;
-		for (int i = 0; i < disk.length; i++) {
-			if (disk[i] != null) {
-				count++;
-				System.out.println(i + ":");
-				for (int j = 0; j < disk[i].length; j++) {
-					System.out.println(disk[i][j]);
-				}
-			}
-		}
-		System.out.println("NOT NULL Disks: " + count);
-	}
+	// private static void printdisk(String[][] disk) {
+	// System.out.println("Printing Disk:");
+	// int count = 0;
+	// for (int i = 0; i < disk.length; i++) {
+	// if (disk[i] != null) {
+	// count++;
+	// System.out.println(i + ":");
+	// for (int j = 0; j < disk[i].length; j++) {
+	// System.out.println(disk[i][j]);
+	// }
+	// }
+	// }
+	// System.out.println("NOT NULL Disks: " + count);
+	// }
 
 	public static String[] formatPath(String path) {
 		return path.split("/");

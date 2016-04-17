@@ -5,18 +5,14 @@ import Exceptions.OutOfSpaceException;
 class Leaf extends Node {
 
 	/**
-	 * Size (in KB) of Leaf
+	 * Data store in the leaf (in B)
 	 */
-	public int size;
+	public int data_size;
 	/**
 	 * Array of blocks containing Leaf data
 	 */
-	public int[] allocations;
 
-	/**
-	 * Array of bytes that contain the data of the file.
-	 */
-	public byte[] data;
+	public int[] allocations;
 
 	/**
 	 * Ctor - create leaf.
@@ -31,7 +27,7 @@ class Leaf extends Node {
 	public Leaf(String name, int size) throws OutOfSpaceException {
 
 		this.name = name;
-		this.size = size;
+		this.data_size = 0;
 		allocateSpace(size);
 
 	}
@@ -45,7 +41,8 @@ class Leaf extends Node {
 
 	@Override
 	public String toString() {
-		return "Leaf:" + "\n\tname: " + name + "\n\tsize: " + size + "\n\tAllocations: " + Arrays.toString(allocations);
+		return "Leaf:" + "\n\tname: " + name + "\n\tsize: " + data_size + "\n\tAllocations: "
+				+ Arrays.toString(allocations);
 	}
 
 }
