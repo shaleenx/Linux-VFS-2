@@ -1,11 +1,9 @@
-import Exceptions.BadFileNameException;
-import Exceptions.DirectoryNotEmptyException;
-import Exceptions.OutOfSpaceException;
-
 import java.io.IOException;
 import java.util.Arrays;
 
-import javax.tools.DiagnosticListener;
+import Exceptions.BadFileNameException;
+import Exceptions.DirectoryNotEmptyException;
+import Exceptions.OutOfSpaceException;
 
 public class FileSystem {
 
@@ -32,7 +30,7 @@ public class FileSystem {
 
 		fileStorage = new Space(m);
 
-		diskManager = new DiskManager(m * 1024);
+		diskManager = new DiskManager(m);
 
 	}
 
@@ -48,7 +46,7 @@ public class FileSystem {
 		Tree workingTree = fileSystemTree;
 
 		if (!name[0].equals("root") || (FileExists(name) != null)) {
-			// System.out.println("not root");
+			// Printer.println("not root");
 			throw new BadFileNameException("Invalid File Exception");
 
 		}
@@ -59,7 +57,7 @@ public class FileSystem {
 
 		// loop all the way, creating as we go down if necessary
 		for (int i = 0; i < name.length; i++) {
-			// System.out.println("in loop");
+			// Printer.println("in loop");
 			workingTree = workingTree.GetChildByName(name[i]);
 		}
 
@@ -116,7 +114,7 @@ public class FileSystem {
 
 		Tree workingTree = fileSystemTree;
 		String fileName = name[name.length - 1];
-		// System.out.println("WTF: " + name[0]);
+		Printer.println("WTF: " + name[0]);
 		if (!name[0].equals("root")) {
 
 			throw new BadFileNameException();
@@ -328,8 +326,9 @@ public class FileSystem {
 	 *            The text to be written to the file.
 	 * @throws OutOfSpaceException
 	 * @throws BadFileNameException
+	 * @throws IOException
 	 */
-	public void write(String[] name, String input) throws BadFileNameException, OutOfSpaceException {
+	public void write(String[] name, String input) throws BadFileNameException, OutOfSpaceException, IOException {
 
 		int input_size = input.length();
 		int num_blocks = (input.length() % 1024 == 0) ? input_size / 1024 : input_size / 1024 + 1;
@@ -341,10 +340,19 @@ public class FileSystem {
 		}
 
 		file = FileExists(name);
-		diskManager.writeToDisk(file, input);
+		file.data_size = input_size;
+		Printer.println("IN WRITE: " + file.toString());
+
+		int file_size = file.data_size * 1024;
+		if (input_size < file_size)
+			diskManager.writeToDisk(file, input);
+		else {
+			// To implement the case when the input is bigger than the file
+			// itself.
+		}
 	}
 
-	public void append(String[] name, String input) throws BadFileNameException, OutOfSpaceException {
+	public void append(String[] name, String input) throws BadFileNameException, OutOfSpaceException, IOException {
 
 		int input_size = input.length();
 		int num_blocks = (input.length() % 1024 == 0) ? input_size / 1024 : input_size / 1024 + 1;
@@ -352,23 +360,34 @@ public class FileSystem {
 		Leaf file = FileExists(name);
 
 		if (file == null) {
+			 Printer.println("File Append: file is null");
 			file(name, num_blocks);
+			write(name, input);
 		} else {
-			int size = file.size;
+			int size_blocks = (file.data_size % 1024 == 0) ? file.data_size / 1024 : file.data_size / 1024 + 1;
 			int blocksRequired = num_blocks;
 			if (fileStorage.countFreeSpace() < blocksRequired) {
 				throw new OutOfSpaceException("DiskSpace Full!");
 			}
-			String filedata = diskManager.read(file);
-			this.rmfile(name);
-			file(name, num_blocks + size);
+			String filedata = diskManager.readFromDisk(file).trim();
+			Printer.println("old data: " + filedata);
+			Printer.println("OLD File" + file.toString());
+			rmfile(name);
+			Printer.println(FileExists(name));
+			file(name, num_blocks + size_blocks);
 			file = FileExists(name);
-			diskManager.writeToDisk(file, filedata + input);
+			String newData = filedata + input;
+			file.data_size = newData.length();
+			Printer.println("new File" + file.toString());
+
+			diskManager.writeToDisk(file, newData);
 		}
 
 	}
 
-	public String read(String[] formatPath) {
-		return null;
+	public String read(String[] name) throws IOException {
+		Leaf file = FileExists(name);
+		String data = diskManager.readFromDisk(file);
+		return data.trim();
 	}
 }

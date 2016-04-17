@@ -1,5 +1,6 @@
 import Exceptions.OutOfSpaceException;
 
+import java.util.Collections;
 import java.util.LinkedList;
 
 class Space {
@@ -39,7 +40,6 @@ class Space {
 	public void Alloc(int size, Leaf file) throws OutOfSpaceException {
 
 		file.allocations = new int[size];
-		file.data = new byte[size * 1024];
 
 		// we reached this point, therefore there is enough free space
 		for (int i = 0; i < size; i++) {
@@ -66,6 +66,7 @@ class Space {
 			freeBlocks.add(file.allocations[i]);
 
 		}
+		Collections.sort(freeBlocks);
 
 		file.parent.children.remove(file.name);
 
