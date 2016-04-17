@@ -97,7 +97,11 @@ public class FileSimulator {
 				case "exit":
 					break;
 				case "help":
+          printhelp();
+          break;
 				default:
+          System.out.println("Command not found");
+          printhelp();
 					break;
 				}
 			}
@@ -143,7 +147,24 @@ public class FileSimulator {
 		System.out.println("NOT NULL Disks: " + count);
 	}
 
-	public static String[] formatPath(String path) {
+	private static void printhelp() {
+		System.out.println("Usage:");
+		System.out.println("To create new folder:\t\t mkdir directoryname");
+		System.out.println("To change directory: \t\t cd directoryname \nTo go to parent directory: \t\t cd ..");
+		System.out.println("To remove directory(only empty directories) : \t\t rmdir directoryname");
+		System.out.println("To create a empty new file: \t\t touch filename filesize");
+		System.out.println("To remove a file: \t\t rm filename");
+		System.out.println("To move a file to different folder: \t\t mv source destination");
+		System.out.println("To list all contents of the directory: \t\t ls");
+		System.out.println("To view contents of the file: \t\t cat filename");
+		System.out.println("To write contents to a file:\nInsert contents\t\t echo contents > filename \nAppend contents:\t\t echo content >> filename");
+		System.out.println("To view this message:\t\t help");
+		System.out.println("To exit:\t\t exit");
+
+	}
+	
+  public static String[] formatPath(String path) {
 		return path.split("/");
 	}
 }
+
