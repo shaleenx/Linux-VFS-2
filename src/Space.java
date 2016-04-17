@@ -1,5 +1,6 @@
 import Exceptions.OutOfSpaceException;
 
+import java.util.Collections;
 import java.util.LinkedList;
 
 class Space {
@@ -66,6 +67,7 @@ class Space {
 			freeBlocks.add(file.allocations[i]);
 
 		}
+		Collections.sort(freeBlocks);
 
 		file.parent.children.remove(file.name);
 

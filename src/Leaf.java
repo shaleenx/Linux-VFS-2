@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 import Exceptions.OutOfSpaceException;
 
 class Leaf extends Node {
@@ -29,7 +31,7 @@ class Leaf extends Node {
 	public Leaf(String name, int size) throws OutOfSpaceException {
 
 		this.name = name;
-
+		this.size = size;
 		allocateSpace(size);
 
 	}
@@ -37,7 +39,13 @@ class Leaf extends Node {
 	private void allocateSpace(int size) throws OutOfSpaceException {
 
 		FileSystem.fileStorage.Alloc(size, this);
+		System.out.println(Arrays.toString(allocations));
 
+	}
+
+	@Override
+	public String toString() {
+		return "Leaf:" + "\n\tname: " + name + "\n\tsize: " + size + "\n\tAllocations: " + Arrays.toString(allocations);
 	}
 
 }

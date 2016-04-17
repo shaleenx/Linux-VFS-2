@@ -15,7 +15,7 @@ public class FileSimulator {
 			ArrayList<String> prompt = new ArrayList<>();
 			prompt.add("root");
 			String cmd = "";
-			FileSystem sda = new FileSystem(10240);
+			FileSystem sda = new FileSystem(1024);
 			Scanner sc = new Scanner(System.in);
 			while (!cmd.equalsIgnoreCase("exit")) {
 				System.out.print("pradeet@OS: /" + formatPrompt(prompt) + "$  ");
@@ -58,6 +58,7 @@ public class FileSimulator {
 				case "touch":
 					String fileName = sc.next();
 					int size = Integer.parseInt(sc.next());
+					System.out.println("size: " + size);
 					sda.file(formatPath(formatPrompt(prompt) + "/" + fileName), size);
 					break;
 				case "rm":
@@ -85,10 +86,12 @@ public class FileSimulator {
 					String argument = sc.nextLine();
 					String input = argument.substring(1, argument.length());
 					input = input.substring(1, input.lastIndexOf("\""));
-					System.out.println(input);
+					System.out.println("input: " + input);
 					String[] arguments = argument.substring(argument.lastIndexOf("\"") + 1).trim().split(" ");
-					System.out.println(arguments[0]);
+					System.out.println(Arrays.toString(arguments));
 					if (">".equals(arguments[0])) {
+						System.out.println((formatPrompt(prompt) + "/" + arguments[1]));
+						System.out.println("input: " + input);
 						sda.write(formatPath(formatPrompt(prompt) + "/" + arguments[1]), input);
 					} else if (">>".equals(arguments[0])) {
 						sda.append(formatPath(formatPrompt(prompt) + "/" + arguments[1]), input);

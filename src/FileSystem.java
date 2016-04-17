@@ -1,11 +1,9 @@
-import Exceptions.BadFileNameException;
-import Exceptions.DirectoryNotEmptyException;
-import Exceptions.OutOfSpaceException;
-
 import java.io.IOException;
 import java.util.Arrays;
 
-import javax.tools.DiagnosticListener;
+import Exceptions.BadFileNameException;
+import Exceptions.DirectoryNotEmptyException;
+import Exceptions.OutOfSpaceException;
 
 public class FileSystem {
 
@@ -32,7 +30,7 @@ public class FileSystem {
 
 		fileStorage = new Space(m);
 
-		diskManager = new DiskManager(m * 1024);
+		diskManager = new DiskManager(m);
 
 	}
 
@@ -328,8 +326,9 @@ public class FileSystem {
 	 *            The text to be written to the file.
 	 * @throws OutOfSpaceException
 	 * @throws BadFileNameException
+	 * @throws IOException
 	 */
-	public void write(String[] name, String input) throws BadFileNameException, OutOfSpaceException {
+	public void write(String[] name, String input) throws BadFileNameException, OutOfSpaceException, IOException {
 
 		int input_size = input.length();
 		int num_blocks = (input.length() % 1024 == 0) ? input_size / 1024 : input_size / 1024 + 1;
@@ -341,10 +340,18 @@ public class FileSystem {
 		}
 
 		file = FileExists(name);
-		diskManager.writeToDisk(file, input);
+		System.out.println(file.toString());
+
+		int file_size = file.size * 1024;
+		if (input_size < file_size)
+			diskManager.writeToDisk(file, input);
+		else {
+			// To implement the case when the input is bigger than the file
+			// itself.
+		}
 	}
 
-	public void append(String[] name, String input) throws BadFileNameException, OutOfSpaceException {
+	public void append(String[] name, String input) throws BadFileNameException, OutOfSpaceException, IOException {
 
 		int input_size = input.length();
 		int num_blocks = (input.length() % 1024 == 0) ? input_size / 1024 : input_size / 1024 + 1;
@@ -359,7 +366,7 @@ public class FileSystem {
 			if (fileStorage.countFreeSpace() < blocksRequired) {
 				throw new OutOfSpaceException("DiskSpace Full!");
 			}
-			String filedata = diskManager.read(file);
+			String filedata = diskManager.readFromDisk(file);
 			this.rmfile(name);
 			file(name, num_blocks + size);
 			file = FileExists(name);
@@ -369,6 +376,7 @@ public class FileSystem {
 	}
 
 	public String read(String[] formatPath) {
+
 		return null;
 	}
 }
