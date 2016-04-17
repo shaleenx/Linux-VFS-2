@@ -47,7 +47,7 @@ public class FileSystem {
 
 		if (!name[0].equals("root") || (FileExists(name) != null)) {
 			// Printer.println("not root");
-			throw new BadFileNameException("Invalid File Exception");
+			throw new BadFileNameException("Invalid File");
 
 		}
 
@@ -117,7 +117,7 @@ public class FileSystem {
 		Printer.println("WTF: " + name[0]);
 		if (!name[0].equals("root")) {
 
-			throw new BadFileNameException();
+			throw new BadFileNameException("Invalid file path");
 
 		}
 
@@ -128,7 +128,7 @@ public class FileSystem {
 
 			if (file == null) {
 
-				throw new OutOfSpaceException();
+				throw new OutOfSpaceException("Not enough Space in disk");
 
 			} else if (k <= (FileSystem.fileStorage.countFreeSpace() - file.allocations.length)) {
 				// if there will be enough space free after deleting the old
@@ -247,7 +247,7 @@ public class FileSystem {
 
 		if (dir.children.size() > 0) {
 
-			throw new DirectoryNotEmptyException();
+			throw new DirectoryNotEmptyException("Directory not Empty");
 
 		}
 

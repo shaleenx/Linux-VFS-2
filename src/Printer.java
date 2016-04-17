@@ -1,7 +1,7 @@
 
 public class Printer {
 
-	static boolean debug = true;
+	static boolean debug = false;
 
 	static void println(Object log) {
 		if (debug)
