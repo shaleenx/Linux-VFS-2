@@ -17,8 +17,7 @@ public class FileSystem {
 	public static DiskManager diskManager;
 
 	/**
-	 * Ctor - Initialise filesystem with empty root directory and \c m KB of
-	 * space
+	 * Initialise filesystem with empty root directory and \c m KB of space
 	 *
 	 * @param m
 	 *            Amount, in KB, of disk space to allocate
@@ -97,7 +96,7 @@ public class FileSystem {
 	}
 
 	/**
-	 * Create a \c k KB file, path provided in name.
+	 * Create a k KB file, path provided in name.
 	 *
 	 * @param name
 	 *            String array, each element of which is an element in the path
@@ -318,7 +317,7 @@ public class FileSystem {
 	}
 
 	/**
-	 * Writes to the file specified in /c fromat.
+	 * Writes to the file specified.
 	 * 
 	 * @param name
 	 *            Name of the file to be written.
@@ -352,6 +351,15 @@ public class FileSystem {
 		}
 	}
 
+	/**
+	 * apendds to the File Specified.
+	 * 
+	 * @param name
+	 * @param input
+	 * @throws BadFileNameException
+	 * @throws OutOfSpaceException
+	 * @throws IOException
+	 */
 	public void append(String[] name, String input) throws BadFileNameException, OutOfSpaceException, IOException {
 
 		int input_size = input.length();
@@ -360,7 +368,7 @@ public class FileSystem {
 		Leaf file = FileExists(name);
 
 		if (file == null) {
-			 Printer.println("File Append: file is null");
+			Printer.println("File Append: file is null");
 			file(name, num_blocks);
 			write(name, input);
 		} else {
@@ -385,6 +393,13 @@ public class FileSystem {
 
 	}
 
+	/**
+	 * reads from the file specified
+	 * 
+	 * @param name
+	 * @return
+	 * @throws IOException
+	 */
 	public String read(String[] name) throws IOException {
 		Leaf file = FileExists(name);
 		String data = diskManager.readFromDisk(file);

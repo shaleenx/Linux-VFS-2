@@ -2,48 +2,49 @@ import java.util.HashMap;
 
 class Tree extends Node {
 
-    /**
-     * The children of the current node
-     */
-    public HashMap<String, Node> children = new HashMap<String, Node>();
+	/**
+	 * The children of the current node
+	 */
+	public HashMap<String, Node> children = new HashMap<String, Node>();
 
+	/**
+	 * create tree.
+	 *
+	 * @param name
+	 *            The name of the root element of this tree.
+	 */
+	public Tree(String name) {
 
-    /**
-     * Ctor - create tree.
-     *
-     * @param name The name of the root element of this tree.
-     */
-    public Tree(String name) {
+		this.name = name;
 
-        this.name = name;
+	}
 
-    }
+	/**
+	 * Get a child from a Node, or create it if nonexistant.
+	 *
+	 * @param name
+	 *            Name of child to search for.
+	 * @return Tree found (or created).
+	 */
+	public Tree GetChildByName(String name) {
 
-    /**
-     * Get a child from a \c Node, or create it if nonexistant.
-     *
-     * @param name Name of child to search for.
-     * @return Tree found (or created).
-     */
-    public Tree GetChildByName(String name) {
+		if (this.children.containsKey(name)) {
+			// System.out.println("dir exists");
+			return (Tree) this.children.get(name);
 
-        if (this.children.containsKey(name)) {
-//        	System.out.println("dir exists");
-            return (Tree) this.children.get(name);
+		}
 
-        }
+		// not found - create
 
-        //not found - create
+		Tree newTree = new Tree(name);
+		// System.out.println(this.name);
+		newTree.parent = this;
+		newTree.depth = newTree.parent.depth + 1;
 
-        Tree newTree = new Tree(name);
-//        System.out.println(this.name);
-        newTree.parent = this;
-        newTree.depth = newTree.parent.depth + 1;
+		this.children.put(name, newTree);
 
-        this.children.put(name, newTree);
+		return newTree;
 
-        return newTree;
-
-    }
+	}
 
 }

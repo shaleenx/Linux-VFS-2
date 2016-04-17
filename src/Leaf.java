@@ -15,7 +15,7 @@ class Leaf extends Node {
 	public int[] allocations;
 
 	/**
-	 * Ctor - create leaf.
+	 * create leaf.
 	 *
 	 * @param name
 	 *            Name of the leaf.

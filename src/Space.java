@@ -9,7 +9,7 @@ class Space {
 	private LinkedList<Integer> freeBlocks;
 
 	/**
-	 * Ctor - create \c size blank filesystem blocks.
+	 * create \c size blank filesystem blocks.
 	 *
 	 * @param size
 	 */
@@ -29,7 +29,7 @@ class Space {
 	}
 
 	/**
-	 * Allocate \c size blocks to store \c file.
+	 * Allocate 1KB size blocks to store file.
 	 *
 	 * @param size
 	 *            Number of blocks, in KB, required by \c file.
@@ -52,7 +52,7 @@ class Space {
 	}
 
 	/**
-	 * Free any space occupied by \c file.
+	 * Free any space occupied by file.
 	 *
 	 * @param file
 	 *            File to deallocate.
