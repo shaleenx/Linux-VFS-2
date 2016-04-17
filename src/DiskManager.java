@@ -20,14 +20,13 @@ public class DiskManager {
 	}
 
 	public void writeToDisk(Leaf file, String input) throws IOException {
-		System.out.println("DISKMANAGER: " + input);
+		Printer.println("DISKMANAGER: " + input);
 		ArrayList<String> input_blocks = splitEqually(input, 1024);
-		System.out.println(Arrays.toString(input_blocks.toArray()));
+		Printer.println(Arrays.toString(input_blocks.toArray()));
 		for (int i = 0; i < input_blocks.size(); i++) {
 			sda.seek(file.allocations[i] * 1024);
-			String write = input_blocks.get(i);
-			sda.writeBytes(write);
-
+			String outputStream = input_blocks.get(i);
+			sda.writeBytes(outputStream);
 		}
 	}
 
@@ -51,7 +50,7 @@ public class DiskManager {
 
 			data += new String(read);
 			read_size += 1024;
-			if(read_size > data_size){
+			if (read_size > data_size) {
 				break;
 			}
 		}

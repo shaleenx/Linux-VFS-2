@@ -16,22 +16,21 @@ public class FileSimulator {
 			prompt.add("root");
 			String cmd = "";
 			FileSystem sda = new FileSystem(1024);
+			Printer.println("HELLO");
 			Scanner sc = new Scanner(System.in);
 			while (!cmd.equalsIgnoreCase("exit")) {
-				System.out.print("pradeet@OS: /" + formatPrompt(prompt) + "$  ");
+				Printer.print("pradeet@OS: /" + formatPrompt(prompt) + "$  ");
 				cmd = sc.next();
 				switch (cmd) {
 				case "sda":
-					System.out.println("Check version 2 for this feature :P");
+					Printer.println("Check version 2 for this feature :P");
 					break;
 				case "mkdir":
 					String folderName = sc.next();
 					if (folderName.contains("/")) {
-						System.out.println(
+						Printer.println(
 								"mkdir: cannot create directory \'" + folderName + "\': No such file or Directory");
 					}
-					// System.out.println(formatPrompt(prompt) + "/" +
-					// folderName);
 					sda.dir(formatPath(formatPrompt(prompt) + "/" + folderName));
 					break;
 				case "cd":
@@ -44,7 +43,7 @@ public class FileSimulator {
 					if (tree != null) {
 						prompt.addAll(Arrays.asList(folderName.split("/")));
 					} else {
-						System.out.println("cd: " + folderName + ": No such file or directory");
+						Printer.println("cd: " + folderName + ": No such file or directory");
 					}
 					break;
 				case "rmdir":
@@ -58,7 +57,7 @@ public class FileSimulator {
 				case "touch":
 					String fileName = sc.next();
 					int size = Integer.parseInt(sc.next());
-					System.out.println("size: " + size);
+					Printer.println("size: " + size);
 					sda.file(formatPath(formatPrompt(prompt) + "/" + fileName), size);
 					break;
 				case "rm":
@@ -71,7 +70,7 @@ public class FileSimulator {
 					}
 					break;
 				case "mv":
-					System.out.println("Check version 2 for this feature :P");
+					Printer.println("Check version 2 for this feature :P");
 					break;
 				case "ls":
 					String[] list = sda.lsdir(formatPath(formatPrompt(prompt)));
@@ -80,25 +79,26 @@ public class FileSimulator {
 				case "cat":
 					fileName = sc.next();
 					String data = sda.read(formatPath(formatPrompt(prompt) + "/" + fileName));
-					System.out.println(data);
+					Printer.println(data);
 					break;
 				case "echo":
 					String argument = sc.nextLine();
 					String input = argument.substring(1, argument.length());
 					input = input.substring(1, input.lastIndexOf("\""));
-					System.out.println("input: " + input);
+					Printer.println("input: " + input);
 					String[] arguments = argument.substring(argument.lastIndexOf("\"") + 1).trim().split(" ");
-					System.out.println(Arrays.toString(arguments));
+					Printer.println(Arrays.toString(arguments));
 					if (">".equals(arguments[0])) {
-						System.out.println((formatPrompt(prompt) + "/" + arguments[1]));
-						System.out.println("input: " + input);
+						Printer.println((formatPrompt(prompt) + "/" + arguments[1]));
+						Printer.println("input: " + input);
 						sda.write(formatPath(formatPrompt(prompt) + "/" + arguments[1]), input);
 					} else if (">>".equals(arguments[0])) {
+						Printer.println("INTO APPEND");
 						sda.append(formatPath(formatPrompt(prompt) + "/" + arguments[1]), input);
 					}
 					break;
 				case "pwd":
-					System.out.println(formatPrompt(prompt));
+					Printer.println(formatPrompt(prompt));
 				case "exit":
 					break;
 				case "help":
@@ -128,24 +128,24 @@ public class FileSimulator {
 			return;
 		}
 		for (int i = 0; i < lsdir.length; i++) {
-			System.out.print(lsdir[i] + "  ");
+			Printer.print(lsdir[i] + "  ");
 		}
-		System.out.println();
+		Printer.println();
 	}
 
 	// private static void printdisk(String[][] disk) {
-	// System.out.println("Printing Disk:");
+	// Printer.println("Printing Disk:");
 	// int count = 0;
 	// for (int i = 0; i < disk.length; i++) {
 	// if (disk[i] != null) {
 	// count++;
-	// System.out.println(i + ":");
+	// Printer.println(i + ":");
 	// for (int j = 0; j < disk[i].length; j++) {
-	// System.out.println(disk[i][j]);
+	// Printer.println(disk[i][j]);
 	// }
 	// }
 	// }
-	// System.out.println("NOT NULL Disks: " + count);
+	// Printer.println("NOT NULL Disks: " + count);
 	// }
 
 	public static String[] formatPath(String path) {
